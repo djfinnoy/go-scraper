@@ -1,0 +1,20 @@
+defaults:
+  scrapers:
+    startDate: "2019-01-01"
+    endDate: yesterday
+    maxDaysPerScrape: 5
+
+scrapers:
+  - name: gcusd
+    type: FMP
+    url: https://financialmodelingprep.com/api/v3/historical-chart/{{.interval}}/{{.name}}?apikey={{.apiKey}}
+    interval: 5min
+    apiKey: $FMP_APIKEY
+    tz: America/New_York
+    destination:
+      bigQuery:
+        project: djf-home-cluster
+        dataset: financialmodelingprep
+        table: gcusd
+
+
