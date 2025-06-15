@@ -22,7 +22,7 @@ type BigQueryTable struct {
 
 type BigQueryRow map[string]bigquery.Value
 
-func NewBigQueryTable(project string, dataset string, table string) (*BigQueryTable, error) {
+func NewBigQueryTable(project string, dataset string, table string, partition string) (*BigQueryTable, error) {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, project)
 	if err != nil {
@@ -39,6 +39,10 @@ func NewBigQueryTable(project string, dataset string, table string) (*BigQueryTa
 			// Create the table if it doesn't exist
 			tableMetadata := &bigquery.TableMetadata{
 				Schema: bigquery.Schema{}, // Empty schema
+				TimePartitioning: &bigquery.TimePartitioning{
+					Type:  bigquery.DayPartitioningType,
+					Field: partition,
+				},
 			}
 			if err := tbl.Create(ctx, tableMetadata); err != nil {
 				client.Close()
@@ -59,7 +63,7 @@ func NewBigQueryTable(project string, dataset string, table string) (*BigQueryTa
 
 // Methods
 
-func (bq *BigQueryTable) Write(jsonData []map[string]interface{}, tz *time.Location) error {
+func (bq *BigQueryTable) Write(jsonData []map[string]any, tz *time.Location) error {
 	data := jsonToBigQueryRows(jsonData, tz)
 
 	if len(data) == 0 {
@@ -67,6 +71,7 @@ func (bq *BigQueryTable) Write(jsonData []map[string]interface{}, tz *time.Locat
 	}
 
 	inserter := bq.table.Inserter()
+
 	var err error
 	maxRetries := 10
 	handledMissingSchema := false
@@ -97,6 +102,7 @@ func (bq *BigQueryTable) Write(jsonData []map[string]interface{}, tz *time.Locat
 	return fmt.Errorf("failed to insert data after %d attempts: %v", maxRetries, err)
 }
 
+// TODO: This will probably be replaced by partition metadata
 func (bq *BigQueryTable) GetTableDates(colname string) ([]daterange.DateRange, error) {
 	ctx := context.Background()
 	tbl := fmt.Sprintf("%s.%s.%s", bq.table.ProjectID, bq.table.DatasetID, bq.table.TableID)

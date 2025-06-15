@@ -16,5 +16,6 @@ scrapers:
         project: djf-home-cluster
         dataset: financialmodelingprep
         table: gcusd
+        partition: date
 
 

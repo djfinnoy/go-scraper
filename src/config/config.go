@@ -112,7 +112,7 @@ func (c ScraperConfig) GetDateRange() dr.DateRange {
 	return dr.NewDateRange(startDate, endDate)
 }
 
-func (c ScraperConfig) GetBigQueryTable() (*bq.BigQueryTable, error) {
+func (c ScraperConfig) NewBigQueryTable() (*bq.BigQueryTable, error) {
 	cfg, ok := c["destination"].(map[string]interface{})["bigQuery"].(map[string]interface{})
 	if !ok {
 		panic(fmt.Sprintf("`bigQuery` key is missing, or contains invalid values: %v", cfg))
@@ -133,7 +133,12 @@ func (c ScraperConfig) GetBigQueryTable() (*bq.BigQueryTable, error) {
 		panic(fmt.Sprintf("`bigQuery.table` key is missing: %v", cfg))
 	}
 
-	return bq.NewBigQueryTable(project, dataset, table)
+	partition, ok := cfg["partition"].(string)
+	if !ok {
+		panic(fmt.Sprintf("`bigQuery.partition` key is missing: %v", cfg))
+	}
+
+	return bq.NewBigQueryTable(project, dataset, table, partition)
 }
 
 // Helper functions

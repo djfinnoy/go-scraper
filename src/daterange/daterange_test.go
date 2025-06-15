@@ -35,7 +35,6 @@ func TestDateRange(t *testing.T) {
 		daterange.NewDateRange("2024-01-09", "2024-03-30"),
 	}
 
-	// TODO: actually test this
 	missing := configDr.GetMissing(dbDrs)
 	if dr := missing[0].GetInterval(); dr != "2024-01-01T00:00:00 to 2024-01-02T00:00:00\n" {
 		t.Errorf("unexpected missing daterange, got: %v", dr)
@@ -43,4 +42,6 @@ func TestDateRange(t *testing.T) {
 	if dr := missing[1].GetInterval(); dr != "2024-03-31T00:00:00 to 2024-03-31T00:00:00\n" {
 		t.Errorf("unexpected missing daterange, got: %v", dr)
 	}
+
+	//
 }
